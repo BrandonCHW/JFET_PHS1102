@@ -1,0 +1,9 @@
+﻿  main.cpp
+  JFET.cpp
+c:\users\brandonpc\documents\visual studio 2015\projects\devoir phs1102\devoir phs1102\jfet.cpp(91): warning C4101: 'v0': unreferenced local variable
+c:\users\brandonpc\documents\visual studio 2015\projects\devoir phs1102\devoir phs1102\jfet.cpp(91): warning C4101: 'v3': unreferenced local variable
+c:\users\brandonpc\documents\visual studio 2015\projects\devoir phs1102\devoir phs1102\jfet.cpp(91): warning C4101: 'v2': unreferenced local variable
+c:\users\brandonpc\documents\visual studio 2015\projects\devoir phs1102\devoir phs1102\jfet.cpp(91): warning C4101: 'v1': unreferenced local variable
+  Generating Code...
+  Devoir PHS1102.vcxproj -> C:\Users\BrandonPC\Documents\Visual Studio 2015\Projects\Devoir PHS1102\Debug\Devoir PHS1102.exe
+  Devoir PHS1102.vcxproj -> C:\Users\BrandonPC\Documents\Visual Studio 2015\Projects\Devoir PHS1102\Debug\Devoir PHS1102.pdb (Full PDB)
