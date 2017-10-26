@@ -52,7 +52,7 @@ void Jfet::setsize_y(const int& size)
 	size_y = size;
 }
 
-void Jfet::setpot(const double& pot, const int& x, const int& y) const 
+void Jfet::setpot(const int& x, const int& y, const double& pot)
 {
 	potentials[x][y].setValue(pot);
 }
@@ -89,92 +89,102 @@ void Jfet::finiteDifferenceMethod(const double& Seuil, const double& MaxItera)
 	double Vnouveau = 0.0;
 
 	
-while (!Convergence && Nitera <= MaxItera) {
-		Nitera++;
-		Convergence = true;
+	do
+	{
+			Nitera++;
+			Convergence = true;
 	
-		for (int row = 0; row < getsize_x(); ++row) { // pour chaque point
-			for (int col = 0; col < getsize_y(); ++col) {
-				if (getpot(row, col).isModif()) { //verifier que le potentiel peut etre modifiable
+			for (int row = 0; row < getsize_x(); ++row) { // pour chaque point
+				for (int col = 0; col < getsize_y(); ++col) {
+					if (getpot(row, col).isModif()) { //verifier que le potentiel peut etre modifiable
 
-					vertical = 0;
-					horizontal = 0;
-					isVerticalEdge = false;
-					isHorizontalEdge = false;
+						vertical = 0;
+						horizontal = 0;
+						isVerticalEdge = false;
+						isHorizontalEdge = false;
 
-					if (col - 1 < 0) { // potentiel a la frontiere conducteur/dielectrique gauche
-						v1 = 0; //aucun potentiel
-						isVerticalEdge = true;
-					}
-					else {
-						v1 = getpot(row, col - 1).getValue();
-					}
 
-					if (col + 1 > getsize_y() - 1) {// potentiel a la frontiere conducteur/dielectrique droite
-						v4 = 0;
-						isVerticalEdge = true;
-					}
-					else
-						v4 = getpot(row, col + 1).getValue();
+						if (col - 1 < 0) { // potentiel a la frontiere conducteur/dielectrique gauche
+							v1 = 0; //aucun potentiel
+							isVerticalEdge = true;
+						}
+						else {
+							v1 = getpot(row, col - 1).getValue();
+						}
 
-					if (row - 1 < 0) {// potentiel a la frontiere conducteur/dielectrique haut
-						v2 = 0;
-						isHorizontalEdge = true;
-					}
-					else
-						v2 = getpot(row - 1, col).getValue();
-										
-					if (row + 1 > getsize_x() - 1) {
-						v3 = 0;
-						isHorizontalEdge = true;
-					}
-					else
-						v3 = getpot(row + 1, col).getValue();
+						if (col + 1 > getsize_y() - 1) {// potentiel a la frontiere conducteur/dielectrique droite
+							v4 = 0;
+							isVerticalEdge = true;
+						}
+						else
+							v4 = getpot(row, col + 1).getValue();
 
-					vertical = v2 + v3;
-					horizontal = v1 + v4;
+						if (row - 1 < 0) {// potentiel a la frontiere conducteur/dielectrique haut
+							v2 = 0;
+							isHorizontalEdge = true;
+						}
+						else
+							v2 = getpot(row - 1, col).getValue();
+
+						if (row + 1 > getsize_x() - 1) {
+							v3 = 0;
+							isHorizontalEdge = true;
+						}
+						else
+							v3 = getpot(row + 1, col).getValue();
+
+						vertical = v2 + v3;
+						horizontal = v1 + v4;
 					
-					//moyenne
-					if (isVerticalEdge && !isHorizontalEdge) //est un interface conducteur/dielectrique vertical
-						Vnouveau = (2 * vertical + horizontal) / 2;
+						//moyenne
+						if (isVerticalEdge && !isHorizontalEdge) { //est un interface conducteur/dielectrique vertical
+							Vnouveau = (2 * horizontal + vertical) / 2;
+						//	cout << "vertical" << endl;
+						}
+						else if (!isVerticalEdge && isHorizontalEdge) { //est un interface conducteur/dielectrique horizontal
+							Vnouveau = (2 * vertical + horizontal) / 2;
+						//	cout << "horizontal" << endl;
+						}
+						else if (isVerticalEdge && isHorizontalEdge) { // est un interface dielectrique/coin conducteur
+							Vnouveau = (vertical + horizontal) / 2;
+						//	cout << "coin" << endl;
+						}
+						else if (!isVerticalEdge && !isHorizontalEdge) { //condition de dirichlet
+							Vnouveau = (vertical + horizontal) / 4;
+						//	cout << "dirichlet" << endl;
+						}
+					
+						//cout << Vnouveau << endl;
+						//voir si difference est plus grande que le seuil
+						if (abs(Vnouveau - potentials[row][col].getValue()) > Seuil)
+							Convergence = false;
 
-					else if (!isVerticalEdge && isHorizontalEdge) //est un interface conducteur/dielectrique horizontal
-						Vnouveau = (2 * horizontal + vertical) / 2;
-
-					else if (isVerticalEdge && isHorizontalEdge) // est un interface dielectrique/coin conducteur
-						Vnouveau = (vertical + horizontal) / 2;
-
-					else if (!isVerticalEdge && !isHorizontalEdge)
-						Vnouveau = (vertical + horizontal) / 4;
-
-					//voir si difference est plus grande que le seuil
-					if (abs(Vnouveau - potentials[row][col].getValue()) > Seuil)
-						Convergence = false;
-
-					potentials[row][col].setValue(abs(Vnouveau - potentials[row][col].getValue()));
-				}				
+						setpot(row, col, Vnouveau);
+					}				
+				}
 			}
-		}
-	}
+		cout << Nitera << " " <<getpot(0, 1).getValue() << " ?? " << endl;
+	} while (!Convergence && Nitera <= MaxItera);
 }
 
 void Jfet::printpots() 
 {
-	cout << setprecision(8) << fixed;
+	cout << getpot(0, 1).getValue() << endl;
+	/*
+	cout << setprecision(6) << fixed;
 	cout << "Tableau des potentiels du JFET \n\n";
 
 	int blank = 13; //utilise pour espacement
 
-	for (int i = 0; i < getsize_x() - 0; ++i) { // affiche seulement l'interieur (pas la frontiere)
-		for (int j = 0; j < getsize_y() - 0; ++j) { //affiche seulement l'interieur 
-
+	for (int i = 0; i < getsize_x(); ++i) { // affiche seulement l'interieur (pas la frontiere)
+		for (int j = 0; j < getsize_y(); ++j) { //affiche seulement l'interieur 
 			if (getpot(i, j).getValue() > 100.0 ) {
-				cout << setw(blank) << getpot(i, j).getValue(); 
+				cout << setw(blank) << getpot(i, j).getValue();
 			}
 			else {
 				cout << setw(blank) << getpot(i, j).getValue();
 			}
 		}
 		cout << "\n\n";
-	}
+	}*/
 }

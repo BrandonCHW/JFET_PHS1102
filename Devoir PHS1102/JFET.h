@@ -23,7 +23,7 @@ public:
 	//setters
 	void setsize_x(const int& size);
 	void setsize_y(const int& size);
-	void setpot(const double& pot, const int& x, const int& y) const;
+	void setpot(const int& x, const int& y, const double& pot);
 
 	//jfet methods
 	void setPotsModif();

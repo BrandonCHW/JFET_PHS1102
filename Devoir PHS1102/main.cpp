@@ -19,24 +19,27 @@ int main()
 	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 150 },
-	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 150 },
-	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 150 },
-	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 150 } };
+	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -150 },
+	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -150 },
+	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -150 },
+	 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -150 } };
 	
 
 	
 	//remplir le tableau des potentiels avec les valeurs initiales (JFET a l'etat initial)
 	for( int i = 0; i < 13; i++)
 		for (int j = 0; j < 17; j++)
-			jfet.setpot(potentials_init[i][j], i, j); 
+			jfet.setpot(i, j, potentials_init[i][j]); 
 
+	cout << "Initialement : " << endl;
+	jfet.printpots();
 	jfet.setPotsModif();
 
-	cout << "\n\n ";
+	cout << "\n\n";
 	double Seuil = 0.01;
-	int MaxItera = 10000;
+	int MaxItera = 1;
 	jfet.finiteDifferenceMethod(Seuil, MaxItera);
+	cout << "Apres : " << endl;
 	jfet.printpots();
 	return 0;
 }
