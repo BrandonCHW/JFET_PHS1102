@@ -70,10 +70,10 @@ void Jfet::setPotsModif()
 			potentials[bottomrow][bottomcol].setModif(false); 
 	}
 
-	for (int sourcerow = 0; sourcerow <= 4; sourcerow++) // potentiels a la source
+	for (int sourcerow = 0; sourcerow <= 3; sourcerow++) // potentiels a la source
 		potentials[sourcerow][0].setModif(false);
 
-	for (int drainrow = 8; drainrow <= 12; drainrow++) // potentiels au drain
+	for (int drainrow = 9; drainrow <= 12; drainrow++) // potentiels au drain
 		potentials[drainrow][16].setModif(false);
 }
 
@@ -88,8 +88,7 @@ void Jfet::finiteDifferenceMethod(const double& Seuil, const double& MaxItera)
 	bool Convergence = false;
 	double Vnouveau = 0.0;
 
-	
-	do
+	while (!Convergence && Nitera < MaxItera)
 	{
 			Nitera++;
 			Convergence = true;
@@ -138,23 +137,18 @@ void Jfet::finiteDifferenceMethod(const double& Seuil, const double& MaxItera)
 					
 						//moyenne
 						if (isVerticalEdge && !isHorizontalEdge) { //est un interface conducteur/dielectrique vertical
-							Vnouveau = (2 * horizontal + vertical) / 2;
-						//	cout << "vertical" << endl;
+							Vnouveau = (2.0 * horizontal + vertical) / 4.0;
 						}
 						else if (!isVerticalEdge && isHorizontalEdge) { //est un interface conducteur/dielectrique horizontal
-							Vnouveau = (2 * vertical + horizontal) / 2;
-						//	cout << "horizontal" << endl;
+							Vnouveau = (2.0 * vertical + horizontal) / 4.0;
 						}
 						else if (isVerticalEdge && isHorizontalEdge) { // est un interface dielectrique/coin conducteur
-							Vnouveau = (vertical + horizontal) / 2;
-						//	cout << "coin" << endl;
+							Vnouveau = (vertical + horizontal) / 2.0;
 						}
 						else if (!isVerticalEdge && !isHorizontalEdge) { //condition de dirichlet
-							Vnouveau = (vertical + horizontal) / 4;
-						//	cout << "dirichlet" << endl;
+							Vnouveau = (vertical + horizontal) / 4.0;
 						}
 					
-						//cout << Vnouveau << endl;
 						//voir si difference est plus grande que le seuil
 						if (abs(Vnouveau - potentials[row][col].getValue()) > Seuil)
 							Convergence = false;
@@ -163,18 +157,53 @@ void Jfet::finiteDifferenceMethod(const double& Seuil, const double& MaxItera)
 					}				
 				}
 			}
-		cout << Nitera << " " <<getpot(0, 1).getValue() << " ?? " << endl;
-	} while (!Convergence && Nitera <= MaxItera);
+	} 
+}
+double Jfet::findFieldIntensity(const int& i, const int& j)
+{
+	double deltaX = 0.06 * (10 ^ -6); //0.06 um
+	double deltaV = getpot(i + 1, j + 1).getValue() - getpot(i, j).getValue();
+	double fieldIntensity = -(deltaV / deltaX);
+	return fieldIntensity;
+}
+
+double Jfet::findCurrentDensity(const int& i, const int& j)
+{
+	double fieldIntensity = findFieldIntensity(i, j);
+	double resistivity = 0.09 * (10 ^ -2); // resistivite, ohm / metre
+	double conductivity = 1.0 / resistivity; // conductivite, siemen / metre
+	double currentDensity = conductivity * fieldIntensity;
+	return currentDensity;
+}
+
+double Jfet::findCurrent()
+{
+	double resistivity = 0.09 * (10 ^ -2); // resistivite, ohm / metre
+	double conductivity = 1.0 / resistivity; // conductivite, siemen / metre
+	double depth = 30.0 * (10 ^ -6); // profondeur, metre
+	double deltaY = 0.06 * (10 ^ -6); // hauteur, metre
+	double sumPot = 0.0; // somme des differences de potentiels
+
+	for (int row = 4; row < 7; ++row) {
+		double left, right = 0.0;
+		left = (getpot(row, 7).getValue() + getpot(row + 1, 7).getValue()) / 2.0;
+		right = (getpot(row, 8).getValue() + getpot(row + 1, 8).getValue()) / 2.0;
+		sumPot += (left - right) * (10 ^ -3); //diff pot en Volt
+	}
+	cout << "resistivity : " << resistivity << endl;
+	cout << "cond : " << conductivity << ". \nprofondeur : " << depth << ". \nsumpot : " << sumPot << endl;
+	double current = -(conductivity * depth * sumPot);
+	return current;
 }
 
 void Jfet::printpots() 
 {
-	cout << getpot(0, 1).getValue() << endl;
-	/*
-	cout << setprecision(6) << fixed;
-	cout << "Tableau des potentiels du JFET \n\n";
+	//cout << getpot(0, 1).getValue() << endl;
+	
+	cout << setprecision(4) << fixed;
+	cout << "Tableau des potentiels du JFET (valeurs en mV) \n\n";
 
-	int blank = 13; //utilise pour espacement
+	int blank = 9; //variable utilise pour espacement
 
 	for (int i = 0; i < getsize_x(); ++i) { // affiche seulement l'interieur (pas la frontiere)
 		for (int j = 0; j < getsize_y(); ++j) { //affiche seulement l'interieur 
@@ -186,5 +215,5 @@ void Jfet::printpots()
 			}
 		}
 		cout << "\n\n";
-	}*/
+	}
 }

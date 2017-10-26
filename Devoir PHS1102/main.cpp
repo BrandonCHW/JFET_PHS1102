@@ -31,15 +31,15 @@ int main()
 		for (int j = 0; j < 17; j++)
 			jfet.setpot(i, j, potentials_init[i][j]); 
 
-	cout << "Initialement : " << endl;
-	jfet.printpots();
 	jfet.setPotsModif();
 
 	cout << "\n\n";
 	double Seuil = 0.01;
-	int MaxItera = 1;
+	int MaxItera = 10000;
+
 	jfet.finiteDifferenceMethod(Seuil, MaxItera);
-	cout << "Apres : " << endl;
 	jfet.printpots();
+	cout << "densite : " << jfet.findCurrentDensity(0,1) << endl;
+	cout << "courant : " << jfet.findCurrent() << endl;
 	return 0;
 }

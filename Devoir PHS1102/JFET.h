@@ -28,6 +28,9 @@ public:
 	//jfet methods
 	void setPotsModif();
 	void finiteDifferenceMethod(const double& Seuil, const double& MaxItera);
+	double findCurrentDensity(const int& i, const int& j);
+	double findFieldIntensity(const int& i, const int& j);
+	double findCurrent();
 	void printpots();
 	
 private:
